@@ -1,0 +1,32 @@
+
+body {
+	background-color: #fff;
+	font: 8pt "Helvetica Neue", sans-serif;
+	color: #000;
+}
+
+#map {
+	position: relative;
+	width: 600px;
+	height: 300px;
+	border: 2px inset;
+	margin: 20px auto;
+}
+
+#map-canvas {
+	width: 100%;
+	height: 100%;
+}
+
+#toolbar {
+	width: 100%;
+	padding: 10px 0px 10px 0px;
+	text-align: center;
+	background-color: #f8f8f8;
+	border-top: 1px dotted #ccc;
+	border-bottom: 1px dotted #ccc;
+}
+
+#toolbar > div {
+	display: inline-block;
+}
