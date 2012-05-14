@@ -48,15 +48,15 @@ function initializeMap() {
 			panControl: false
 	};
 
-	mapsAgent.map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+	mapsApi.map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 
-	mapsAgent.directionsDisplay = new google.maps.DirectionsRenderer();	
-	mapsAgent.directionsDisplay.setMap(mapsAgent.map);
+	mapsApi.directionsDisplay = new google.maps.DirectionsRenderer();	
+	mapsApi.directionsDisplay.setMap(mapsApi.map);
 
-	mapsAgent.showRoute(start, end);	
+	mapsApi.showRoute(start, end);	
 }
 
-var mapsAgent = {
+var mapsApi = {
 		map: null,
 		directionsDisplay: null,
 		directionsService: new google.maps.DirectionsService(),
@@ -72,7 +72,7 @@ var mapsAgent = {
 			};
 			this.directionsService.route(request, function(result, status) {
 				if (status == google.maps.DirectionsStatus.OK) {
-					mapsAgent.directionsDisplay.setDirections(result);
+					mapsApi.directionsDisplay.setDirections(result);
 				} else {
 					console.log("Error Response received from Google  status= " + status + ": result :" + result);					
 				}
@@ -86,14 +86,14 @@ var mapsAgent = {
 				position: new google.maps.LatLng(json.lat, json.lng)
 			});
 			google.maps.event.addListener(marker, 'click', function() {
-				mapsAgent.showHelpWindow(json.message, marker);
+				mapsApi.showHelpWindow(json.message, marker);
 			});
 			this.markersArray.push(marker);			
 
 		},
 		"showHelpWindow" : function(message, marker) {
-			mapsAgent.infoWindow.setContent(message);
-			mapsAgent.infoWindow.open(this.map, marker);
+			mapsApi.infoWindow.setContent(message);
+			mapsApi.infoWindow.open(this.map, marker);
 		},
 		"clearOverlays" : function() { // Removes the overlays from the map, but keeps them in the array
 			if (this.markersArray) {
@@ -121,49 +121,49 @@ var mapsAgent = {
 };
 
 var wsApi = {
-		connectedEndpoint:null,
-		callbackAdded:false,
-		incompleteMessage:"",
-		subscribe:function () {          
+	connectedEndpoint:null,
+	callbackAdded:false,
+	subscribe:function () {          
 
-			var request = {
-					url: appUrl,
-					logLevel : 'info',
-					transport: 'websocket', /* websocket, jsonp, long-polling, polling, streaming */
-					fallbackTransport: 'streaming',
-					attachHeadersAsQueryString: true,
-					onOpen : function(response) {
-						console.log("Connected to realtime endpoint using " + response.transport);
-					},
-					onClose : function(response) {
-						console.log("Disconnected from realtime endpoint");
-					},
-					onMessage : function (response) {
-						if (response.transport != 'polling' && response.state == 'messageReceived') {
-							if (response.status == 200) {
-								var data = response.responseBody;
-								if (data.length > 0) {
+		var request = {
+				url: appUrl,
+				logLevel : 'info',
+				transport: 'websocket', /* websocket, jsonp, long-polling, polling, streaming */
+				fallbackTransport: 'streaming',
+				attachHeadersAsQueryString: true,
+				onOpen : function(response) {
+					console.log("Connected to realtime endpoint using " + response.transport);
+				},
+				onClose : function(response) {
+					console.log("Disconnected from realtime endpoint");
+				},
+				onMessage : function (response) {
+					if (response.transport != 'polling' && response.state == 'messageReceived') {
+						if (response.status == 200) {
+							var data = response.responseBody;
+							if (data.length > 0) {
 
-									console.log("Message Received using " + response.transport + ": " + data);
-									var json = JSON.parse(data);
-									mapsAgent.addMarkder(json);
-								}
+								console.log("Message Received using " + response.transport + ": " + data);
+								var json = JSON.parse(data);
+								mapsApi.addMarkder(json);
 							}
 						}
 					}
-			};
+				}
+		};
 
-			this.connectedEndpoint = $.atmosphere.subscribe(request);
-		},
+		this.connectedEndpoint = $.atmosphere.subscribe(request);
+		callbackAdded = true;
+	},
 
-		send:function (message) {
-			console.log("Sending message");
-			console.log(message);
-			this.connectedEndpoint.push(JSON.stringify(message));
-		},
+	send:function (message) {
+		console.log("Sending message");
+		console.log(message);
+		this.connectedEndpoint.push(JSON.stringify(message));
+	},
 
-		unsubscribe:function () {
-			$.atmosphere.unsubscribe();
-		}
+	unsubscribe:function () {
+		$.atmosphere.unsubscribe();
+	}
 };
 
